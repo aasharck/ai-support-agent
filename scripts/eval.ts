@@ -14,6 +14,8 @@ interface Case {
   question: string;
   expect: "answer" | "refuse" | "tool";
   source?: string;
+  /** The section that holds the answer; used for the retrieval score. */
+  section?: string;
   tool?: string;
   toolOk?: boolean;
   mustInclude?: string[];
@@ -69,9 +71,9 @@ await db.close();
 const passed = results.filter((r) => r.pass).length;
 // Separates retrieval misses (the right file never reached the model) from answer misses.
 const docCases = results.filter((r) => r.expect === "answer");
-const hits = docCases.filter((r) => r.reply.retrieved.some((c) => c.source === r.source)).length;
+const hits = docCases.filter((r) => r.reply.retrieved.some((c) => c.source === r.source && c.section === r.section)).length;
 console.log(`\nScore: ${passed}/${cases.length} (${Math.round((passed / cases.length) * 100)}%)`);
-console.log(`Retrieval: the expected file was in the top ${TOP_K} chunks for ${hits}/${docCases.length} docs questions`);
+console.log(`Retrieval: the section with the answer was in the top ${TOP_K} chunks for ${hits}/${docCases.length} docs questions`);
 if (mode === "live") console.log(`API cost: $${cost.toFixed(4)}`);
 
 await mkdir("evals/results", { recursive: true });

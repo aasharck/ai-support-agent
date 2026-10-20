@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Db } from "../src/lib/db";
 import { localEmbedder } from "../src/lib/embed";
 import { ingestDirectory } from "../src/lib/ingest";
-import { retrieve } from "../src/lib/retrieve";
+import { MAX_PER_DOCUMENT, retrieve } from "../src/lib/retrieve";
 import { createLocalDb, DOCS_DIR } from "../src/lib/store";
 
 let db: Db;
@@ -46,6 +46,12 @@ describe("retrieval", () => {
     const hits = await retrieve(db, localEmbedder, "How do I clean the steam wand?");
     const scores = hits.map((h) => h.similarity);
     expect(scores).toEqual([...scores].sort((a, b) => b - a));
+  });
+
+  test(`keeps at most ${MAX_PER_DOCUMENT} chunks per file, so other files still get a look in`, async () => {
+    const hits = await retrieve(db, localEmbedder, "How long is the warranty on the Burrline 64 grinder?");
+    expect(hits.filter((h) => h.path === "burrline-64-grinder.md")).toHaveLength(MAX_PER_DOCUMENT);
+    expect(hits.map((h) => `${h.path} › ${h.section}`)).toContain("warranty.md › Coverage");
   });
 
   test("returns nothing for questions the docs don't cover", async () => {
