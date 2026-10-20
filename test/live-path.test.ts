@@ -42,9 +42,10 @@ function script(...steps: ((params: Params) => Anthropic.Beta.BetaMessage)[]) {
   return { create, calls };
 }
 
+const blocks = (m: Anthropic.Beta.BetaMessageParam) => m.content as unknown as Block[];
+
 const documentsOf = (params: Params) => {
-  const lastUser = params.messages.at(-1)!;
-  return (lastUser.content as Block[]).filter((b) => b.type === "document") as { title: string; source: { data: string } }[];
+  return blocks(params.messages.at(-1)!).filter((b) => b.type === "document") as { title: string; source: { data: string } }[];
 };
 
 const ask = (question: string, create: CreateMessage) =>
@@ -91,7 +92,7 @@ describe("live mode", () => {
       () => message([{ type: "text", text: "It shipped with DHL Express and should arrive on 21 October." }], "end_turn"),
     );
     const r = await ask("Where is TB-10042? I'm sam@example.com", create);
-    const toolResult = (calls[1].messages.at(-1)!.content as Block[])[0];
+    const toolResult = blocks(calls[1].messages.at(-1)!)[0];
     expect(toolResult).toMatchObject({ type: "tool_result", tool_use_id: "tu_1", is_error: false });
     expect(String(toolResult.content)).toContain("7741029384");
     expect(calls[1].messages.at(-2)).toMatchObject({ role: "assistant" });
@@ -105,7 +106,7 @@ describe("live mode", () => {
       () => message([{ type: "text", text: "Could you give me your order number (it starts with TB-) and your email?" }], "end_turn"),
     );
     const r = await ask("where's my order 10042", create);
-    const toolResult = (calls[1].messages.at(-1)!.content as Block[])[0];
+    const toolResult = blocks(calls[1].messages.at(-1)!)[0];
     expect(toolResult).toMatchObject({ is_error: true });
     expect(String(toolResult.content)).toMatch(/Invalid input/);
     expect(r.toolCalls[0].ok).toBe(false);
