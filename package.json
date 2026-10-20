@@ -2,8 +2,23 @@
   "name": "ai-support-agent",
   "version": "0.1.0",
   "private": true,
+  "description": "RAG support agent demo: Next.js + Supabase pgvector + Claude, with cited answers, refusals, two tools, tests and an eval.",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "eval": "tsx scripts/eval.ts",
+    "ingest": "tsx scripts/ingest.ts",
+    "db:setup": "tsx scripts/db-setup.ts",
+    "typecheck": "tsc --noEmit",
+    "make:pdf": "tsx scripts/make-sample-pdf.ts"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
     "@electric-sql/pglite": "^0.5.10",
