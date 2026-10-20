@@ -1,5 +1,10 @@
-# NOTES: part 1 (Tue Oct 20, morning AI run)
+# NOTES
 
+> **For Aashar:** run `npm install && npm run dev`, click the six sample questions, and read `README.md` and `~/Projects/Freelancing/upwork/portfolio/ai-support-agent.md` for anything you wouldn't say to a client.
+> Then run `npm run eval` once with your Anthropic key (estimated under $0.50); the live path has never made a real call.
+> Nothing is pushed: push branch `initial-version` to GitHub yourself when you're happy with it.
+
+## Part 1 (Tue Oct 20, morning AI run)
 Built unattended while Aashar was away. Nothing pushed, deployed or published. **$0 spent:** there's no `ANTHROPIC_API_KEY` on this machine, so not one Claude call was made.
 
 ## What works (verified)
@@ -8,7 +13,7 @@ Built unattended while Aashar was away. Nothing pushed, deployed or published. *
 - Retrieval through the `match_chunks` SQL function (cosine, HNSW index), with a threshold and a "shares at least one real word" check for the local embedder.
 - Mock agent: cited answers, "I don't know" for out-of-scope questions, order lookup (asks for the email first), ticket creation.
 - Tools validated with zod (strict schemas); order lookup needs number + email and doesn't reveal which order numbers exist; ticket rate limit of 3/hour per email; can't attach someone else's order.
-- `npm test`: 46 passing. `npm run typecheck`: clean. `npm run build`: clean.
+- `npm test`: 46 passing at the end of part 1 (47 after part 2). `npm run typecheck`: clean. `npm run build`: clean.
 - `npm run eval`: 15 questions, mock score **13/15**, retrieval hit (right file in top 5) 10/10. Misses: `refund-timing` (mock answers from the top chunk only; the right chunk is #2) and `warranty-burrline` (word-matching embedder ranks the Burrline overview above warranty.md › Coverage, which isn't in the top 5).
 
 ## What's mocked or untested
@@ -26,7 +31,16 @@ Built unattended while Aashar was away. Nothing pushed, deployed or published. *
 - Non-streaming responses. Catalog Standard tier promises streaming, so that's a part-2/next item.
 - Vitest + tsx instead of `node:test` (the RLS demo's choice) because Next.js projects use path aliases and extensionless imports.
 
-## Part 2 (tonight, 21:00): suggested order
+## Part 2 (Tue Oct 20, evening AI run): what changed
+Still $0 spent and nothing pushed.
+- **Retrieval:** at most 3 of the top 5 chunks can come from one file (`MAX_PER_DOCUMENT`). Before, "warranty on the Burrline 64" filled the top 5 with Burrline chunks; now warranty.md › Coverage is #5. The eval now scores retrieval by **section**, not just file: 10/10.
+- **Eval still 13/15 in mock mode.** Both misses have the right section retrieved (#2 for refund timing, #5 for the Burrline warranty), but mock mode quotes only from the #1 chunk. I tried picking the best sentence across the top 3 chunks: it dropped to 12/15 (it broke "Is shipping free?"), and tuning it further would have meant fitting rules to the 15 questions. Reverted. Claude reads all 5 chunks, so the live eval is the real test.
+- **Screenshots** (`npm run screenshots`: Playwright driving the installed Google Chrome, mock mode, light theme, 1600×1200): `docs/screenshots/1-cited-answer.png`, `2-refusal.png`, `3-tool-call.png`. They're in a subfolder, which ingestion ignores (it only reads `.md`/`.pdf` at the top of `docs/`). Copies of 1 and 3 are in `upwork/portfolio/`.
+- **README** rewritten for a non-technical client: what it does, a 3-step mermaid diagram, the eval score, how to try it, what it would take for their docs; developer details below.
+- **Portfolio write-up:** `upwork/portfolio/ai-support-agent.md`. Says it's a demo for a made-up shop, and that it hasn't run with a live key.
+- 47 tests, typecheck and `next build` clean.
+
+## Part 2 plan (from the morning run, kept for reference)
 1. **Screenshots** for README and portfolio, in mock mode (`npm run dev`, then click the sample questions): (a) a cited docs answer with the sources list, (b) order lookup with the `lookup_order ✓` chip, (c) the "I don't know" reply, (d) the right-hand panel showing retrieved chunks with scores. Save to `docs-assets/` or `screenshots/` (not `docs/`, which is the knowledge base). The UI already has light and dark themes.
 2. **README:** add the screenshots at the top; keep the "made-up shop" line. Don't call it a client project anywhere.
 3. **Portfolio write-up** in `upwork/portfolio/` (match the SitesGen/TraccoAI write-ups): problem → what it does (cited answers, I-don't-know, tools with guardrails, eval score) → stack → "demo for a fictional shop". Link to catalog-2's Advanced tier (tools + evals + cost logging is exactly what's shown).
