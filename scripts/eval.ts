@@ -1,6 +1,6 @@
 // Runs the 15 questions in evals/questions.json through the agent and prints a score.
 // Mock mode (no ANTHROPIC_API_KEY) is free. Live mode calls Claude once or twice per
-// question; the cost is printed at the end (about $0.01–0.03 per question on Opus 5.5).
+// question; the measured cost is printed at the end (estimated $0.01–0.03 per question on Opus 5.5).
 // Usage: npm run eval [-- --json]
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { answer, currentMode, type AgentReply } from "../src/lib/agent";

@@ -6,16 +6,16 @@
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=20.9"
+    "node": ">=22.9"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "eval": "tsx scripts/eval.ts",
-    "ingest": "tsx scripts/ingest.ts",
-    "db:setup": "tsx scripts/db-setup.ts",
+    "eval": "tsx --env-file-if-exists=.env scripts/eval.ts",
+    "ingest": "tsx --env-file-if-exists=.env scripts/ingest.ts",
+    "db:setup": "tsx --env-file-if-exists=.env scripts/db-setup.ts",
     "typecheck": "tsc --noEmit",
     "make:pdf": "tsx scripts/make-sample-pdf.ts"
   },
